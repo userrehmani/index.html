@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saffron & Sage | Modern Bistro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .cart-slide { transition: transform 0.3s ease-in-out; }
+  </style>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans">
+
+  <!-- Navbar -->
+  <header class="bg-white shadow-sm sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-amber-600 tracking-tight">Saffron & Sage</h1>
+      <nav class="space-x-6 hidden md:block font-medium">
+        <a href="#menu" class="hover:text-amber-600">Menu</a>
+        <a href="#reserve" class="hover:text-amber-600">Book a Table</a>
+      </nav>
+      <button onclick="toggleCart()" class="bg-amber-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-amber-700 flex items-center gap-2">
+        <span>Cart</span>
+        <span id="cart-count" class="bg-amber-800 px-2 py-0.5 rounded-full text-xs">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-stone-900 text-white py-16 px-4 text-center">
+    <h2 class="text-4xl md:text-5xl font-bold mb-4">Fresh Flavors, Crafted Daily</h2>
+    <p class="text-stone-300 max-w-xl mx-auto mb-8">Order online for instant pickup or reserve a table for an unforgettable dining experience.</p>
+    <div class="flex justify-center gap-4">
+      <a href="#menu" class="bg-amber-600 hover:bg-amber-700 px-6 py-3 rounded-lg font-semibold">Order Food</a>
+      <a href="#reserve" class="bg-stone-700 hover:bg-stone-600 px-6 py-3 rounded-lg font-semibold">Reserve Table</a>
+    </div>
+  </section>
+
+  <!-- Menu Section -->
+  <section id="menu" class="max-w-6xl mx-auto px-4 py-12">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+      <h3 class="text-3xl font-bold">Our Menu</h3>
+      
+      <!-- Filters & Search -->
+      <div class="flex flex-wrap gap-2">
+        <button onclick="filterMenu('All')" class="filter-btn bg-amber-600 text-white px-4 py-1.5 rounded-full text-sm font-medium">All</button>
+        <button onclick="filterMenu('Starters')" class="filter-btn bg-stone-200 hover:bg-stone-300 px-4 py-1.5 rounded-full text-sm font-medium">Starters</button>
+        <button onclick="filterMenu('Mains')" class="filter-btn bg-stone-200 hover:bg-stone-300 px-4 py-1.5 rounded-full text-sm font-medium">Mains</button>
+        <button onclick="filterMenu('Desserts')" class="filter-btn bg-stone-200 hover:bg-stone-300 px-4 py-1.5 rounded-full text-sm font-medium">Desserts</button>
+        <input type="text" id="search-input" oninput="searchMenu()" placeholder="Search dishes..." class="border border-stone-300 rounded-full px-4 py-1.5 text-sm focus:outline-none focus:border-amber-600">
+      </div>
+    </div>
+
+    <!-- Menu Grid -->
+    <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </section>
+
+  <!-- Table Reservation Section -->
+  <section id="reserve" class="bg-amber-50 py-12 px-4 border-t border-amber-100">
+    <div class="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-sm">
+      <h3 class="text-2xl font-bold mb-2">Reserve a Table</h3>
+      <p class="text-stone-500 mb-6 text-sm">Book your spot in advance—instant confirmation.</p>
+      <form onsubmit="handleReservation(event)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Full Name</label>
+          <input type="text" id="res-name" required class="w-full border border-stone-300 rounded-lg p-2.5">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Date</label>
+            <input type="date" id="res-date" required class="w-full border border-stone-300 rounded-lg p-2.5">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Time</label>
+            <input type="time" id="res-time" required class="w-full border border-stone-300 rounded-lg p-2.5">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Guests</label>
+          <select id="res-guests" class="w-full border border-stone-300 rounded-lg p-2.5">
+            <option>2 Guests</option>
+            <option>4 Guests</option>
+            <option>6 Guests</option>
+            <option>8+ Guests</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full bg-stone-900 text-white py-3 rounded-lg font-semibold hover:bg-stone-800">Confirm Reservation</button>
+      </form>
+      <p id="res-msg" class="text-green-600 font-medium mt-4 hidden text-center"></p>
+    </div>
+  </section>
+
+  <!-- Slide-out Cart Drawer -->
+  <div id="cart-drawer" class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl transform translate-x-full cart-slide z-50 flex flex-col justify-between p-6">
+    <div>
+      <div class="flex justify-between items-center border-b pb-4 mb-4">
+        <h4 class="text-xl font-bold">Your Order</h4>
+        <button onclick="toggleCart()" class="text-stone-400 hover:text-stone-700 text-2xl">&times;</button>
+      </div>
+      <div id="cart-items" class="space-y-3 max-h-96 overflow-y-auto"></div>
+    </div>
+    <div class="border-t pt-4">
+      <div class="flex justify-between font-bold text-lg mb-4">
+        <span>Total:</span>
+        <span id="cart-total">$0.00</span>
+      </div>
+      <button onclick="checkout()" class="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700">Checkout Now</button>
+    </div>
+  </div>
+
+  <script>
+    const menuItems = [
+      { id: 1, name: "Crispy Calamari", category: "Starters", price: 12.99, tag: "Popular", desc: "Served with house-made garlic aioli and lemon." },
+      { id: 2, name: "Burrata & Heirloom Tomato", category: "Starters", price: 14.50, tag: "Vegetarian", desc: "Fresh basil, aged balsamic glaze, and toasted sourdough." },
+      { id: 3, name: "Grilled Ribeye Steak", category: "Mains", price: 32.00, tag: "Chef's Special", desc: "12oz prime cut with herb butter and truffle fries." },
+      { id: 4, name: "Wild Mushroom Risotto", category: "Mains", price: 21.00, tag: "Vegetarian", desc: "Arborio rice, parmesan crisp, and white truffle oil." },
+      { id: 5, name: "Pan-Seared Salmon", category: "Mains", price: 26.50, tag: "Gluten-Free", desc: "Served over asparagus with a lemon-dill cream sauce." },
+      { id: 6, name: "Molten Lava Cake", category: "Desserts", price: 9.99, tag: "Sweet", desc: "Warm dark chocolate cake with vanilla bean ice cream." }
+    ];
+
+    let cart = [];
+    let currentCategory = 'All';
+
+    function renderMenu(items) {
+      const grid = document.getElementById('menu-grid');
+      grid.innerHTML = items.map(item => `
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-stone-100 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="font-bold text-lg">${item.name}</h4>
+              <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-medium">${item.tag}</span>
+            </div>
+            <p class="text-stone-500 text-sm mb-4">${item.desc}</p>
+          </div>
+          <div class="flex justify-between items-center pt-3 border-t border-stone-100">
+            <span class="font-bold text-lg text-amber-600">$${item.price.toFixed(2)}</span>
+            <button onclick="addToCart(${item.id})" class="bg-stone-900 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-amber-600 transition">Add to Cart</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterMenu(category) {
+      currentCategory = category;
+      const filtered = category === 'All' ? menuItems : menuItems.filter(i => i.category === category);
+      renderMenu(filtered);
+    }
+
+    function searchMenu() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const filtered = menuItems.filter(i => 
+        (currentCategory === 'All' || i.category === currentCategory) &&
+        (i.name.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query))
+      );
+      renderMenu(filtered);
+    }
+
+    function addToCart(id) {
+      const item = menuItems.find(i => i.id === id);
+      cart.push(item);
+      updateCartUI();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      document.getElementById('cart-count').innerText = cart.length;
+      const cartContainer = document.getElementById('cart-items');
+      if (cart.length === 0) {
+        cartContainer.innerHTML = '<p class="text-stone-400 text-sm">Your cart is empty.</p>';
+      } else {
+        cartContainer.innerHTML = cart.map((item, idx) => `
+          <div class="flex justify-between items-center bg-stone-50 p-2.5 rounded-lg text-sm">
+            <div>
+              <p class="font-semibold">${item.name}</p>
+              <p class="text-stone-500">$${item.price.toFixed(2)}</p>
+            </div>
+            <button onclick="removeFromCart(${idx})" class="text-red-500 hover:text-red-700 text-xs font-semibold">Remove</button>
+          </div>
+        `).join('');
+      }
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
+    }
+
+    function toggleCart() {
+      document.getElementById('cart-drawer').classList.toggle('translate-x-full');
+    }
+
+    function checkout() {
+      if (cart.length === 0) return alert('Your cart is empty!');
+      alert('Order placed! Your food will be ready shortly.');
+      cart = [];
+      updateCartUI();
+      toggleCart();
+    }
+
+    function handleReservation(e) {
+      e.preventDefault();
+      const name = document.getElementById('res-name').value;
+      const date = document.getElementById('res-date').value;
+      const time = document.getElementById('res-time').value;
+      const msg = document.getElementById('res-msg');
+      msg.innerText = `Thanks, ${name}! Your table is booked for ${date} at ${time}.`;
+      msg.classList.remove('hidden');
+      e.target.reset();
+    }
+
+    renderMenu(menuItems);
+    updateCartUI();
+  </script>
+</body>
+</html>
